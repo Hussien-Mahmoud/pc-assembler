@@ -55,19 +55,7 @@ def search_for(name: str) -> list:
     return found_products
 
 
-part_info = ('name', 'price', 'availability', 'link')
-pc_parts = []
-if __name__ == '__main__':
-    print('')
-
-    # choices
-    # 1- adding parts to the list
-    # 2- removing parts from the list
-    # 3- show all chosen products
-    #   1.show only in stock
-    # 4- exporting to CSV file
-
-    # (1) adding parts to the list
+def adding_parts(the_list: list) -> None:
     searching = True
     while searching:
         part = input("Enter the product name you want to search for: ")
@@ -98,15 +86,57 @@ if __name__ == '__main__':
                 for number in numbers:
                     if number.isnumeric():
                         if int(number) < len(results) + 1:
-                            pc_parts.append(results[int(number) - 1])
+                            the_list.append(results[int(number) - 1])
                             print("part added to the list")
                             have_chosen = True
                             searching = False
+                            continue
                         else:
                             print(f"sorry, option {number} is not available")
-                            print("try again from previous list!")
+                            # print("try again from previous list!")
+                            have_chosen = False
+                            searching = True
+                            break
                     else:
                         print("you typed something wrong")
-                        print("try again from previous list!")
+                        # print("try again from previous list!")
+                        have_chosen = False
+                        searching = True
+                        break
+                print("\ntry again from previous list!")
 
+
+part_info = ('name', 'price', 'availability', 'link')
+if __name__ == '__main__':
+    pc_parts = []
+
+    # choices
+    # 1- adding parts to the list
+    # 2- removing parts from the list
+    # 3- show all chosen products
+    #   1.show only in stock
+    # 4- exporting to CSV file
+    while True:
+        if len(pc_parts) != 0:
+            adding_parts(pc_parts)
+        else:
+            print("choose what you want to do!\n")
+            print("(1) adding parts to the list")
+            print("(2) removing parts from the list")
+            print("(3) show all chosen products")
+            print("(4) exporting to a CSV file")
+            print("(q) to exit the program")
+            option = input('>')
+            if option == '1':
+                adding_parts()
+            elif option == '2':
+                pass
+            elif option == '3':
+                pass
+            elif option == '4':
+                pass
+            elif option == 'q' or option == 'Q':
+                break
+            else:
+                print("sorry, you typed something wrong")
     print(pc_parts)

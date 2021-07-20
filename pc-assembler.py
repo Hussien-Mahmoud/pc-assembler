@@ -37,8 +37,6 @@ def results_from_maximumhardware(name: str) -> list:
         website_name = website_name_content.text.strip()
         link = website_name_content.find('a')['href']
         price = str(product.find('div', {'class': "price"}).text).strip()
-
-        print(price)
         if product.find('div', {'class': "label-stock label label-success"}) is not None:
             availability = "Out of Stock"
         else:
@@ -72,10 +70,9 @@ def adding_parts(the_list: list) -> None:
 
         have_chosen = False
         while not have_chosen:
-
             choice = input('>')
             print()
-
+            # analyzing the input
             if choice == 'q' or choice == 'Q':
                 searching = False
                 break
@@ -93,13 +90,11 @@ def adding_parts(the_list: list) -> None:
                             continue
                         else:
                             print(f"sorry, option {number} is not available")
-                            # print("try again from previous list!")
                             have_chosen = False
                             searching = True
                             break
                     else:
                         print("you typed something wrong")
-                        # print("try again from previous list!")
                         have_chosen = False
                         searching = True
                         break
@@ -117,7 +112,7 @@ if __name__ == '__main__':
     #   1.show only in stock
     # 4- exporting to CSV file
     while True:
-        if len(pc_parts) != 0:
+        if len(pc_parts) == 0:
             adding_parts(pc_parts)
         else:
             print("choose what you want to do!\n")

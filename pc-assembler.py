@@ -2,6 +2,53 @@ from bs4 import BeautifulSoup
 import requests
 
 
+def show_parts(the_list: list) -> None:
+    if len(the_list) == 0:
+        print("Nothing to show!")
+        return
+
+    part_info = ('Name', 'Price', 'Availability', 'Link')
+
+    len0 = len(f'({len(the_list)}) ')
+    len1 = len(part_info[0])
+    len2 = len(part_info[1])
+    len3 = len(part_info[2])
+    len4 = len(part_info[3])
+
+    # if len(the_list) > 1:
+    index = 0
+    while index < len(the_list):
+        if len1 < len(the_list[index][0]):
+            len1 = len(the_list[index][0])
+
+        if len2 < len(f'{the_list[index][1]:,.2f}'):
+            len2 = len(f'{the_list[index][1]:,.2f}')
+
+        if len3 < len(the_list[index][2]):
+            len3 = len(the_list[index][2])
+
+        if len4 < len(the_list[index][3]):
+            len4 = len(the_list[index][3])
+
+        index += 1
+    print(' ' * len0 + '+' + '-' * (len1 + len2 + len3 + len4 + 11) + '+')
+    print(' ' * len0 + '| '
+          + part_info[0] + ' ' * (len1 - len(part_info[0])) + ' | '
+          + part_info[1] + ' ' * (len2 - len(part_info[1])) + ' | '
+          + part_info[2] + ' ' * (len3 - len(part_info[2])) + ' | '
+          + part_info[3] + ' ' * (len4 - len(part_info[3])) + ' |')
+    print(' ' * len0 + '+' + '-' * (len1 + len2 + len3 + len4 + 11) + '+')
+
+    for index, (name, price, availability, link) in enumerate(the_list):
+        print(f'({index + 1}) ' + ' ' * (len0 - len(f'({index + 1}) ')), sep='', end='| ')
+        print(name + ' ' * (len1 - len(name)), sep='', end=' | ')
+        print(f'{price:,.2f}' + ' ' * (len2 - len(f'{price:,.2f}')), sep='', end=' | ')
+        print(availability + ' ' * (len3 - len(availability)), sep='', end=' | ')
+        print(link + ' ' * (len4 - len(link)), sep='', end=' |')
+        print()
+    print(' ' * len0 + '+' + '-' * (len1 + len2 + len3 + len4 + 11) + '+')
+
+
 def price_cleaner(price: str) -> float:
     cleaned = ''.join(c for c in price if c.isdigit() or c == '.')
     return float(cleaned)
@@ -67,9 +114,8 @@ def adding_parts(the_list: list) -> None:
             print("nothing was found!")
 
         # showing the options
-        print("choose (multiple choices are seperated by a comma ','):")
-        for index, result in enumerate(results):
-            print(f'({index + 1}) {result}')
+        print("\nChoose (multiple choices are seperated by a comma ',') :")
+        show_parts(results)
         print('\n(0) for none (and search for something else)')
         print('(q) to quit choosing')
 
@@ -89,7 +135,7 @@ def adding_parts(the_list: list) -> None:
                     # check if numeric
                     if number.isnumeric():
                         # check if option is in the list
-                        if int(number) < len(results) + 1:
+                        if int(number) <= len(results):
                             # check for duplicates
                             if results[int(number) - 1] not in the_list:
                                 the_list.append(results[int(number) - 1])
@@ -111,43 +157,44 @@ def adding_parts(the_list: list) -> None:
                     break
 
 
-def show_parts(the_list: list) -> None:
-    len1 = len(the_list[0][0])
-    len2 = len(f'{the_list[0][1]:.2f}')
-    len3 = len(the_list[0][2])
-    len4 = len(the_list[0][3])
-
-    if len(the_list) > 1:
-        index = 0
-        while index < len(the_list) - 1:
-            if len1 < len(the_list[index + 1][0]):
-                len1 = len(the_list[index + 1][0])
-
-            if len2 < len(f'{the_list[index + 1][1]:.2f}'):
-                len2 = len(f'{the_list[index + 1][1]:.2f}')
-
-            if len3 < len(the_list[index + 1][2]):
-                len3 = len(the_list[index + 1][2])
-
-            if len4 < len(the_list[index + 1][3]):
-                len4 = len(the_list[index + 1][3])
-
-            index += 1
-
-    for name, price, availability, link in the_list:
-        print(name + ' ' * (len1 - len(name)), sep='', end=' | ')
-        print(f'{price:.2f}' + ' ' * (len2 - len(f'{price:.2f}')), sep='', end=' | ')
-        print(availability + ' ' * (len3 - len(availability)), sep='', end=' | ')
-        print(link + ' ' * (len4 - len(link)), sep='', end=' | ')
+def removing_parts(the_list: list) -> None:
+    print("\nChoose what to remove (multiple choices are seperated by a comma ',') :")
+    show_parts(the_list)
+    print('(q) to quit removing')
+    have_chosen = False
+    while not have_chosen:
+        choice = input('>')
         print()
-        # print(f'{name:<len1}, {price:<len2}, {availability:<len3}, {link:<len4}')
+        # analyzing the input
+        if choice == 'q' or choice == 'Q':
+            break
+        else:
+            numbers = choice.split(',')
+            for number in numbers:
+                # check if numeric
+                if number.isnumeric():
+                    # check if option is in the list
+                    if int(number) <= len(the_list):
+                        the_list[int(number) - 1] = None
+                        print(f"part ({number}) removed from the list")
+                        have_chosen = True
+                        continue
+                    else:
+                        print(f"sorry, option {number} is not available")
+                else:
+                    print("you typed something wrong")
+                # this will execute if anything wrong happened
+                print("\ntry again from previous list!")
+                have_chosen = False
+                break
+
+        index = len(the_list) - 1
+        while index >= 0:
+            if the_list[index] is None:
+                del the_list[index]
+            index -= 1
 
 
-def removing_parts():
-    pass
-
-
-part_info = ('name', 'price', 'availability', 'link')
 if __name__ == '__main__':
     pc_parts = []
 
@@ -158,7 +205,8 @@ if __name__ == '__main__':
     #   1.show only in stock
     # 4- exporting to CSV file
     while True:
-        if len(pc_parts) == 0:
+        # if len(pc_parts) == 0:
+        if False:
             adding_parts(pc_parts)
         else:
             print("\n****choose what you want to do!****\n")
@@ -171,7 +219,7 @@ if __name__ == '__main__':
             if option == '1':
                 adding_parts(pc_parts)
             elif option == '2':
-                removing_parts()
+                removing_parts(pc_parts)
             elif option == '3':
                 show_parts(pc_parts)
             elif option == '4':

@@ -1,13 +1,26 @@
 from bs4 import BeautifulSoup
 import requests
+import csv
+from os import path, system, name
+from time import sleep
+
+part_info = ('Name', 'Price', 'Availability', 'Link')
+
+
+def clear() -> None:
+    # for windows
+    if name == 'nt':
+        system('cls')
+
+    # for mac and linux(here, os.name is 'posix')
+    else:
+        system('clear')
 
 
 def show_parts(the_list: list) -> None:
     if len(the_list) == 0:
         print("Nothing to show!")
         return
-
-    part_info = ('Name', 'Price', 'Availability', 'Link')
 
     len0 = len(f'({len(the_list)}) ')
     len1 = len(part_info[0])
@@ -56,9 +69,9 @@ def price_cleaner(price: str) -> float:
 
 def results_from_uptodate(name: str) -> list:
     found_products = []
-    content = requests.get(f'https://uptodate.store/?category=0&s={name}&post_type=products').text
+    content = requests.get(f'https://uptodate.store/?category=0&s={name}&post_type=products')
 
-    soup = BeautifulSoup(content, 'lxml')
+    soup = BeautifulSoup(content.text, 'lxml')
     products = soup.find_all('div', {'class': "products"})
     for product in products:
         website_name_content = product.find('h3', {'class': "name"})
@@ -125,8 +138,8 @@ def adding_parts(the_list: list) -> None:
             print()
             # analyzing the input
             if choice == 'q' or choice == 'Q':
-                searching = False
-                break
+                clear()
+                return None
             elif choice == '0':
                 break
             else:
@@ -155,6 +168,8 @@ def adding_parts(the_list: list) -> None:
                     have_chosen = False
                     searching = True
                     break
+    sleep(2)
+    clear()
 
 
 def removing_parts(the_list: list) -> None:
@@ -193,6 +208,57 @@ def removing_parts(the_list: list) -> None:
             if the_list[index] is None:
                 del the_list[index]
             index -= 1
+    sleep(2)
+    clear()
+
+
+def write_to_csv(the_list: list) -> None:
+    if len(the_list) != 0:
+        with open("products.csv", 'w') as file:
+            writer = csv.writer(file)
+            writer.writerow(the_list)
+            for part in pc_parts:
+                writer.writerow(part)
+                print('file exported successfully as "products.csv"')
+    else:
+        print("Sorry, won't make the file because there's nothing in the list")
+
+
+def read_from_csv(the_list: list) -> None:
+    file_name = "products.csv"
+    if path.isfile(file_name):
+        print('we found "products.csv" file exists here')
+        while True:
+            choice = input('Do you want to import from it (y/n): ')
+            if choice == 'y' or choice == 'Y':
+                break
+            elif choice == 'n' or choice == 'N':
+                file_name = input("Enter the destination of the file you want to import: ")
+                break
+            else:
+                pass
+    else:
+        file_name = input("Enter the destination of the file you want to import: ")
+
+    with open(file_name, 'r') as file:
+        reader = csv.reader(file)
+        next(reader)
+        for line in reader:
+            # check if it is just 4 columns
+            if len(line) == 4:
+                # check if the price column is really price
+                try:
+                    line[1] = float(line[1])
+                except ValueError:
+                    print("sorry, the file is corrupted (not numeric)")
+                    break
+                line = tuple(line)
+                print(line)
+                # adding only new elements
+                if line not in the_list:
+                    the_list.append(line)
+            else:
+                print("sorry, the file is corrupted (not 4 columns)")
 
 
 if __name__ == '__main__':
@@ -204,18 +270,33 @@ if __name__ == '__main__':
     # 3- show all chosen products
     #   1.show only in stock
     # 4- exporting to CSV file
+    clear()
     while True:
-        # if len(pc_parts) == 0:
-        if False:
-            adding_parts(pc_parts)
+        if len(pc_parts) == 0:
+            print("\n****choose what you want to do!****\n")
+            print("(1) adding parts to the list")
+            print("(2) importing from a CSV file")
+            print("\n(q) to exit the program")
+            option = input('>')
+            clear()
+            if option == '1':
+                adding_parts(pc_parts)
+            elif option == '2':
+                read_from_csv(pc_parts)
+            elif option == 'q' or option == 'Q':
+                break
+            else:
+                print("sorry, you typed something wrong")
         else:
             print("\n****choose what you want to do!****\n")
             print("(1) adding parts to the list")
             print("(2) removing parts from the list")
             print("(3) show all chosen products")
             print("(4) exporting to a CSV file")
-            print("(q) to exit the program")
+            print("(5) importing from a CSV file")
+            print("\n(q) to exit the program")
             option = input('>')
+            clear()
             if option == '1':
                 adding_parts(pc_parts)
             elif option == '2':
@@ -223,9 +304,11 @@ if __name__ == '__main__':
             elif option == '3':
                 show_parts(pc_parts)
             elif option == '4':
-                pass
+                write_to_csv(pc_parts)
+            elif option == '5':
+                read_from_csv(pc_parts)
             elif option == 'q' or option == 'Q':
                 break
             else:
                 print("sorry, you typed something wrong")
-    print(pc_parts)
+    print(*pc_parts, sep='\n')

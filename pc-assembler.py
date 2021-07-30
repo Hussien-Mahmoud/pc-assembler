@@ -69,9 +69,13 @@ def price_cleaner(price: str) -> float:
 
 def results_from_uptodate(name: str) -> list:
     found_products = []
-    content = requests.get(f'https://uptodate.store/?category=0&s={name}&post_type=products')
+    try:
+        content = requests.get(f'https://uptodate.store/?category=0&s={name}&post_type=products')
+        soup = BeautifulSoup(content.text, 'lxml')
+    except requests.exceptions.ConnectionError as e:
+        print(f"there was an error while getting the page")
+        raise e
 
-    soup = BeautifulSoup(content.text, 'lxml')
     products = soup.find_all('div', {'class': "products"})
     for product in products:
         website_name_content = product.find('h3', {'class': "name"})
@@ -89,13 +93,17 @@ def results_from_uptodate(name: str) -> list:
 
 def results_from_maximumhardware(name: str) -> list:
     found_products = []
-    content = requests.get(
-        f'https://maximumhardware.store/index.php?category_id=0&search={name}&submit_search=&route=product%2Fsearch',
-        headers={
-            'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Mobile Safari/537.36'}
-    )
+    try:
+        content = requests.get(
+            f'https://maximumhardware.store/index.php?category_id=0&search={name}&submit_search=&route=product%2Fsearch',
+            headers={
+                'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Mobile Safari/537.36'}
+        )
+        soup = BeautifulSoup(content.text, 'lxml')
+    except requests.exceptions.ConnectionError as e:
+        print(f"there was an error while getting the page")
+        raise e
 
-    soup = BeautifulSoup(content.text, 'lxml')
     products = soup.find_all('div', {'class': "product-layout"})
     for product in products:
         website_name_content = product.find('h4')
@@ -113,8 +121,23 @@ def results_from_maximumhardware(name: str) -> list:
 
 def search_for(name: str) -> list:
     found_products = []
-    found_products.extend(results_from_uptodate(name))
-    found_products.extend(results_from_maximumhardware(name))
+
+    looping = True
+    while looping:
+        try:
+            found_products.extend(results_from_uptodate(name))
+            found_products.extend(results_from_maximumhardware(name))
+            looping = False
+        except requests.exceptions.ConnectionError:
+            while True:
+                choice = input('Do you want to try again? (y/n): ')
+                if choice == 'y' or choice == 'Y':
+                    break
+                elif choice == 'n' or choice == 'N':
+                    raise ConnectionError
+                else:
+                    pass
+
     return found_products
 
 
@@ -122,7 +145,11 @@ def adding_parts(the_list: list) -> None:
     searching = True
     while searching:
         part = input("Enter the product name you want to search for: ")
-        results = search_for(part)
+        try:
+            results = search_for(part)
+        except ConnectionError:
+            return None
+
         if len(results) == 0:
             print("nothing was found!")
 
@@ -243,20 +270,28 @@ def read_from_csv(the_list: list) -> None:
     with open(file_name, 'r') as file:
         reader = csv.reader(file)
         next(reader)
-        for line in reader:
+        for index, line in enumerate(reader):
             # check if it is just 4 columns
             if len(line) == 4:
                 # check if the price column is really price
                 try:
                     line[1] = float(line[1])
                 except ValueError:
-                    print("sorry, the file is corrupted (not numeric)")
-                    break
+                    print(f"sorry, row {index + 1} is bad (price not numeric)")
+                    print("so not added")
+                    continue
+                # check if the 3rd column is really the availability
+                if not (line[2] == "Out of Stock" or line[2] == "In Stock"):
+                    print(f"sorry, row {index + 1} is bad (in column 3)")
+                    print("so not added")
+                    continue
                 line = tuple(line)
-                print(line)
                 # adding only new elements
                 if line not in the_list:
                     the_list.append(line)
+                    print(line[0] + ": added")
+                else:
+                    print(line[0] + ": already existed")
             else:
                 print("sorry, the file is corrupted (not 4 columns)")
 
@@ -264,12 +299,9 @@ def read_from_csv(the_list: list) -> None:
 if __name__ == '__main__':
     pc_parts = []
 
-    # choices
-    # 1- adding parts to the list
-    # 2- removing parts from the list
-    # 3- show all chosen products
-    #   1.show only in stock
-    # 4- exporting to CSV file
+    # to be added
+    # 3.1- show only in stock
+
     clear()
     while True:
         if len(pc_parts) == 0:

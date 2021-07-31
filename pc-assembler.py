@@ -299,9 +299,6 @@ def read_from_csv(the_list: list) -> None:
 if __name__ == '__main__':
     pc_parts = []
 
-    # to be added
-    # 3.1- show only in stock
-
     clear()
     while True:
         if len(pc_parts) == 0:
@@ -343,4 +340,3 @@ if __name__ == '__main__':
                 break
             else:
                 print("sorry, you typed something wrong")
-    print(*pc_parts, sep='\n')

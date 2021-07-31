@@ -81,7 +81,7 @@ def results_from_uptodate(name: str) -> list:
         website_name_content = product.find('h3', {'class': "name"})
         website_name = website_name_content.text
         link = website_name_content.find('a')['href']
-        price = price_cleaner(product.find('div', {'class': "product-price"}).text)
+        price = price_cleaner(product.select('div.product-price bdi')[0].text)
         if product.find('div', {'class': "tag out-stock"}) is not None:
             availability = "Out of Stock"
         else:

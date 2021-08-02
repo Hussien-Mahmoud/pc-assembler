@@ -246,7 +246,7 @@ def write_to_csv(the_list: list) -> None:
             writer.writerow(the_list)
             for part in pc_parts:
                 writer.writerow(part)
-                print('file exported successfully as "products.csv"')
+        print('file exported successfully as "products.csv"')
     else:
         print("Sorry, won't make the file because there's nothing in the list")
 

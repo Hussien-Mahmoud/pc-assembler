@@ -144,7 +144,7 @@ def search_for(name: str) -> list:
 def adding_parts(the_list: list) -> None:
     searching = True
     while searching:
-        part = input("Enter the product name you want to search for: ")
+        part = input("Enter the product name you want to search for: ").strip()
         try:
             results = search_for(part)
         except ConnectionError:
@@ -173,6 +173,7 @@ def adding_parts(the_list: list) -> None:
                 numbers = choice.split(',')
                 for number in numbers:
                     # check if numeric
+                    number = number.strip()
                     if number.isnumeric():
                         # check if option is in the list
                         if int(number) <= len(results):
@@ -205,7 +206,7 @@ def removing_parts(the_list: list) -> None:
     print('(q) to quit removing')
     have_chosen = False
     while not have_chosen:
-        choice = input('>')
+        choice = input('>').strip()
         print()
         # analyzing the input
         if choice == 'q' or choice == 'Q':
@@ -214,6 +215,7 @@ def removing_parts(the_list: list) -> None:
             numbers = choice.split(',')
             for number in numbers:
                 # check if numeric
+                number = number.strip()
                 if number.isnumeric():
                     # check if option is in the list
                     if int(number) <= len(the_list):
@@ -256,16 +258,16 @@ def read_from_csv(the_list: list) -> None:
     if path.isfile(file_name):
         print('we found "products.csv" file exists here')
         while True:
-            choice = input('Do you want to import from it (y/n): ')
+            choice = input('Do you want to import from it (y/n): ').strip()
             if choice == 'y' or choice == 'Y':
                 break
             elif choice == 'n' or choice == 'N':
-                file_name = input("Enter the destination of the file you want to import: ")
+                file_name = input("Enter the destination of the file you want to import: ").strip()
                 break
             else:
                 pass
     else:
-        file_name = input("Enter the destination of the file you want to import: ")
+        file_name = input("Enter the destination of the file you want to import: ").strip()
 
     with open(file_name, 'r') as file:
         reader = csv.reader(file)
@@ -306,7 +308,7 @@ if __name__ == '__main__':
             print("(1) adding parts to the list")
             print("(2) importing from a CSV file")
             print("\n(q) to exit the program")
-            option = input('>')
+            option = input('>').strip()
             clear()
             if option == '1':
                 adding_parts(pc_parts)
@@ -324,7 +326,7 @@ if __name__ == '__main__':
             print("(4) exporting to a CSV file")
             print("(5) importing from a CSV file")
             print("\n(q) to exit the program")
-            option = input('>')
+            option = input('>').strip()
             clear()
             if option == '1':
                 adding_parts(pc_parts)

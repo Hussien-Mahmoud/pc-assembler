@@ -81,7 +81,7 @@ def results_from_uptodate(name: str) -> list:
         website_name_content = product.find('h3', {'class': "name"})
         website_name = website_name_content.text
         link = website_name_content.find('a')['href']
-        price = price_cleaner(product.select('div.product-price bdi')[0].text)
+        price = price_cleaner(product.select('div.product-price > :last-child')[0].text)
         if product.find('div', {'class': "tag out-stock"}) is not None:
             availability = "Out of Stock"
         else:
@@ -109,7 +109,7 @@ def results_from_maximumhardware(name: str) -> list:
         website_name_content = product.find('h4')
         website_name = website_name_content.text.strip()
         link = website_name_content.find('a')['href']
-        price = price_cleaner(str(product.find('div', {'class': "price"}).text).strip())
+        price = price_cleaner(str(product.find('span', {'class': "price-new"}).text).strip())
         if product.find('div', {'class': "label-stock label label-success"}) is not None:
             availability = "Out of Stock"
         else:
